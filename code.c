@@ -194,24 +194,40 @@ int run_tests(const char *test_file, int is_compression) {
     char temp_expected[] = "temp_expected.txt";
     int test_count = 0;
     int passed = 0;
-
+    int line_count = 0;
+    int total_lines = 0;
+    
     while (fgets(line, sizeof(line), fp) && test_count < MAX_TEST_CASES) {
         if (line[0] == '#') {
-            printf("\nRunning %s Test Case %d:\n", 
-                   is_compression ? "Compression" : "Decompression", 
-                   test_count + 1);
+            if (test_count > 0) {
+                line_count = 0;
+            }
             
-            FILE *temp = fopen(temp_input, "w");
-            while (fgets(line, sizeof(line), fp) && line[0] != '-') {
-                fputs(line, temp);
-            }
-            fclose(temp);
-
-            temp = fopen(temp_expected, "w");
+            FILE *temp_in = fopen(temp_input, "w");
+            FILE *temp_exp = fopen(temp_expected, "w");
+            
+            // Count total lines in this test case
+            long pos = ftell(fp);
+            total_lines = 0;
             while (fgets(line, sizeof(line), fp) && line[0] != '=') {
-                fputs(line, temp);
+                if (line[0] != '#') total_lines++;
             }
-            fclose(temp);
+            fseek(fp, pos, SEEK_SET);
+            
+            // Process test case
+            while (fgets(line, sizeof(line), fp) && line[0] != '=') {
+                if (line[0] == '#') continue;
+                
+                if (line_count < total_lines/2) {
+                    fputs(line, temp_in);
+                } else {
+                    fputs(line, temp_exp);
+                }
+                line_count++;
+            }
+            
+            fclose(temp_in);
+            fclose(temp_exp);
 
             int success;
             if (is_compression) {
@@ -269,6 +285,7 @@ int run_tests(const char *test_file, int is_compression) {
     printf("\nTest Results: %d/%d passed\n", passed, test_count);
     return passed == test_count;
 }
+
 
 int main(int argc, char *argv[]) {
     if (argc == 3) {
