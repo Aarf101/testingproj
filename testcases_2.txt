@@ -54,7 +54,7 @@ AbCdEfG
 
 # Test Case 9 - Multiple words per line
 h 1 e 1 l 2 o 1 w 1 o 1 r 1 l 1 d 1
-t 1 e 1 s 2 t 1 c 1 a 1 s 1 e 1
+t 1 e 1 s 1 t 1 c 1 a 1 s 1 e 1
 -
 helloworld
 testcase
