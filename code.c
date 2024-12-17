@@ -26,10 +26,9 @@ int validate_line(const char *line) {
         if (*ptr != ' ') return 0;
         ptr++;
         
+        // Modified to handle multi-digit numbers
         if (!isdigit(*ptr)) return 0;
-        int num = *ptr - '0';
-        if (num < 1) return 0;
-        ptr++;
+        while (isdigit(*ptr)) ptr++;
         
         if (*ptr && *ptr != ' ' && *ptr != '\n') return 0;
     }
