@@ -10,10 +10,10 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Compile
-      run: gcc -o compress compression.c
+      run: gcc -o compress code.c
       
     - name: Run Compression Tests
-      run: ./compress -test testcases_1.txt
+      run: ./code -test testcases_1.txt
       
     - name: Run Decompression Tests
-      run: ./compress -test testcases_2.txt
+      run: ./code -test testcases_2.txt
