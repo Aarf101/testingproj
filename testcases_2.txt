@@ -23,8 +23,8 @@ DDRMMMFFS
 =
 
 # Test Case 5 - Color codes
-# 1 F 6 # 1 0 6 # 1 A 6
-#FFFFFF#000000#AAAAAA
+H 1 E 6 X 1 A 6 C 1 F 6
+HEEEEEEXAAAAAACFFFFFF
 =
 
 # Test Case 6 - Binary code
