@@ -13,7 +13,7 @@ jobs:
       run: gcc -o compress compression.c
       
     - name: Run Compression Tests
-      run: ./compress -test test_cases.txt
+      run: ./compress -test testcases_1.txt
       
     - name: Run Decompression Tests
-      run: ./compress -test decompression_tests.txt
+      run: ./compress -test testcases_2.txt
