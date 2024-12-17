@@ -117,7 +117,7 @@ int compress_file(const char *input_filename, const char *output_filename) {
     return compressed_length;
 }
 
-// Decompression function
+// Decompression function with improved line handling
 int decompress_file(const char *input_filename, const char *output_filename) {
     FILE *input_file = fopen(input_filename, "r");
     if (input_file == NULL) {
@@ -144,6 +144,7 @@ int decompress_file(const char *input_filename, const char *output_filename) {
     char current_char;
     int count;
     int decompressed_length = 0;
+    int last_char_newline = 1;
 
     while (fgets(line, sizeof(line), input_file)) {
         if (!validate_line(line)) {
@@ -154,7 +155,10 @@ int decompress_file(const char *input_filename, const char *output_filename) {
         }
 
         char *ptr = line;
+        int is_empty_line = 1;
+
         while (*ptr && sscanf(ptr, " %c %d", &current_char, &count) == 2) {
+            is_empty_line = 0;
             for (int i = 0; i < count; i++) {
                 fputc(current_char, output_file);
                 decompressed_length++;
@@ -165,8 +169,9 @@ int decompress_file(const char *input_filename, const char *output_filename) {
             while (*ptr && *ptr == ' ') ptr++;
         }
         
-        if (*ptr == '\n' || !*ptr) {
+        if (!is_empty_line || !last_char_newline) {
             fputc('\n', output_file);
+            last_char_newline = 1;
         }
     }
 
@@ -265,7 +270,6 @@ int run_tests(const char *test_file, int is_compression) {
     return passed == test_count;
 }
 
-// Main function
 int main(int argc, char *argv[]) {
     if (argc == 3) {
         if (strcmp(argv[1], "-test-compress") == 0) {
