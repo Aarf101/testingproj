@@ -1,0 +1,67 @@
+# Test Case 1 - Basic word
+h 1 e 1 l 2 o 1
+-
+hello
+=
+
+# Test Case 2 - Multiple repeated characters
+a 5 b 3 c 2
+-
+aaaaabbbcc
+=
+
+# Test Case 3 - Multiple lines
+b 1 r 1 a 1 v 1 e 1
+s 1 m 1 a 1 r 1 t 1
+e 1 a 1 t 1 i 1 n 1 g 1
+d 1 o 1 g 1 s 1
+-
+brave
+smart
+eating
+dogs
+=
+
+# Test Case 4 - Single character repetition
+z 5
+-
+zzzzz
+=
+
+# Test Case 5 - Numbers and letters
+a 1 b 1 c 1 1 1 2 1 3 1
+-
+abc123
+=
+
+# Test Case 6 - Special characters
+@ 1 # 2 $ 2 % 3
+-
+@##$$%%%
+=
+
+# Test Case 7 - Long repetitions
+a 16
+-
+aaaaaaaaaaaaaaaa
+=
+
+# Test Case 8 - Mixed case
+A 1 b 1 C 1 d 1 E 1 f 1 G 1
+-
+AbCdEfG
+=
+
+# Test Case 9 - Multiple words per line
+h 1 e 1 l 2 o 1 w 1 o 1 r 1 l 1 d 1
+t 1 e 1 s 2 t 1 c 1 a 1 s 1 e 1
+-
+helloworld
+testcase
+=
+
+# Test Case 10 - Complex pattern
+a 2 b 2 c 2 a 2 b 2 c 2
+-
+aabbccaabbcc
+=
