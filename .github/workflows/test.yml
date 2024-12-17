@@ -1,0 +1,19 @@
+name: C Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Compile
+      run: gcc -o compress compression.c
+      
+    - name: Run Compression Tests
+      run: ./compress -test test_cases.txt
+      
+    - name: Run Decompression Tests
+      run: ./compress -test decompression_tests.txt
