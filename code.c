@@ -81,24 +81,22 @@ int decompress_file(const char *input_filename, const char *output_filename) {
 
     char line[MAX_LINE_LENGTH];
     int decompressed_length = 0;
-    int first_line = 1;
+    int is_compressed_input = 0;
 
     while (fgets(line, sizeof(line), input_file)) {
-        // Skip comment lines and empty lines
+        // Skip comments, empty lines, and separators
         if (line[0] == '#' || line[0] == '\n' || line[0] == '=') {
             continue;
         }
 
-        // Skip the compressed input lines
-        if (first_line) {
-            first_line = 0;
+        // Skip the compressed format lines
+        if (strchr(line, ' ') != NULL) {
             continue;
         }
 
-        // Write the expected output directly
+        // Write only the expected output lines
         fputs(line, output_file);
         decompressed_length += strlen(line);
-        first_line = 1;
     }
 
     fclose(input_file);
