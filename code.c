@@ -37,8 +37,9 @@ int compress_file(const char *input_filename, const char *output_filename) {
         return 0;
     }
 
+    
     while ((current_char = fgetc(input_file)) != EOF) {
-        if (current_char == prev_char) {
+        if (current_char == prev_char && current_char != '\n') {
             count++;
         } else {
             if (prev_char != '\n') {
@@ -47,22 +48,24 @@ int compress_file(const char *input_filename, const char *output_filename) {
                 compressed_length += count;
                 first_char = 0;
             } else {
-                fprintf(output_file, "\n");
-                first_char = 1;
+                // Only print newline if not at end of file
+                if (current_char != EOF) {
+                    fprintf(output_file, "\n");
+                    first_char = 1;
+                }
             }
             count = 1;
             prev_char = current_char;
         }
     }
 
+    // Handle last character without adding extra newline
     if (prev_char != '\n' && prev_char != EOF) {
         if (!first_char) fprintf(output_file, " ");
         fprintf(output_file, "%c %d", prev_char, count);
         compressed_length += count;
     }
 
-    fclose(input_file);
-    fclose(output_file);
     return compressed_length;
 }
 
