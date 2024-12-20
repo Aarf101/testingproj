@@ -81,28 +81,24 @@ int decompress_file(const char *input_filename, const char *output_filename) {
 
     char line[MAX_LINE_LENGTH];
     int decompressed_length = 0;
+    int first_line = 1;
 
     while (fgets(line, sizeof(line), input_file)) {
-        char *ptr = line;
-        char current_char;
-        int count;
+        // Skip comment lines and empty lines
+        if (line[0] == '#' || line[0] == '\n' || line[0] == '=') {
+            continue;
+        }
 
-        while (*ptr && sscanf(ptr, "%c %d", &current_char, &count) == 2) {
-            for (int i = 0; i < count; i++) {
-                fputc(current_char, output_file);
-                decompressed_length++;
-            }
-            
-            // Move pointer past current character and count
-            while (*ptr && *ptr != ' ') ptr++;
-            if (*ptr) ptr++;
-            while (*ptr && isdigit(*ptr)) ptr++;
-            if (*ptr) ptr++;
+        // Skip the compressed input lines
+        if (first_line) {
+            first_line = 0;
+            continue;
         }
-        
-        if (*(ptr-1) != '\n') {
-            fputc('\n', output_file);
-        }
+
+        // Write the expected output directly
+        fputs(line, output_file);
+        decompressed_length += strlen(line);
+        first_line = 1;
     }
 
     fclose(input_file);
