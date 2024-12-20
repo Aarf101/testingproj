@@ -118,32 +118,22 @@ int run_tests(const char *test_file, int is_compression) {
     
     while (fgets(line, sizeof(line), fp) && test_count < MAX_TEST_CASES) {
         if (strncmp(line, "# Test Case", 10) == 0) {
+            printf("\nRunning Test Case %d:\n", test_count + 1);
+            
             FILE *temp_in = fopen(temp_input, "w");
             FILE *temp_exp = fopen(temp_expected, "w");
-            int input_section = 1;
+            int reading_input = 1;
             
             while (fgets(line, sizeof(line), fp)) {
-                // Skip comments and empty lines
+                if (line[0] == '=') break;
                 if (line[0] == '#' || line[0] == '\n') continue;
                 
-                // Check for end of test case
-                if (line[0] == '=') break;
-                
-                // Write to appropriate file
-                if (input_section) {
-                    fputs(line, temp_in);
+                if (reading_input) {
+                    fputs(line, is_compression ? temp_in : temp_exp);
+                    reading_input = 0;
                 } else {
-                    fputs(line, temp_exp);
+                    fputs(line, is_compression ? temp_exp : temp_in);
                 }
-                
-                // Check next line to determine section
-                char peek[MAX_LINE_LENGTH];
-                long pos = ftell(fp);
-                if (fgets(peek, sizeof(peek), fp)) {
-                    fseek(fp, pos, SEEK_SET);
-                    if (peek[0] != '=' && !isspace(peek[0])) continue;
-                }
-                input_section = 0;
             }
             
             fclose(temp_in);
@@ -157,18 +147,18 @@ int run_tests(const char *test_file, int is_compression) {
                 FILE *out = fopen(temp_output, "r");
                 FILE *exp = fopen(temp_expected, "r");
                 int match = 1;
+                char out_line[MAX_LINE_LENGTH];
+                char exp_line[MAX_LINE_LENGTH];
 
-                while (fgets(line, sizeof(line), out)) {
-                    char expected[MAX_LINE_LENGTH];
-                    if (!fgets(expected, sizeof(expected), exp) || 
-                        strcmp(line, expected) != 0) {
+                while (fgets(out_line, sizeof(out_line), out)) {
+                    if (!fgets(exp_line, sizeof(exp_line), exp) || 
+                        strcmp(out_line, exp_line) != 0) {
                         match = 0;
                         break;
                     }
                 }
-
-                // Check if expected file has more lines
-                if (fgets(line, sizeof(line), exp)) match = 0;
+                
+                if (fgets(exp_line, sizeof(exp_line), exp)) match = 0;
 
                 fclose(out);
                 fclose(exp);
@@ -202,6 +192,7 @@ int run_tests(const char *test_file, int is_compression) {
     printf("\nTest Results: %d/%d passed\n", passed, test_count);
     return passed == test_count;
 }
+
 
 int main(int argc, char *argv[]) {
     if (argc == 3) {
