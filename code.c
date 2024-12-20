@@ -8,21 +8,9 @@
 
 int validate_line(const char *line) {
     const char *ptr = line;
-    
     while (*ptr) {
-        while (*ptr == ' ') ptr++;
-        if (!*ptr || *ptr == '\n') break;
-        
-        if (!isprint(*ptr)) return 0;
+        if (!isprint(*ptr) && !isspace(*ptr)) return 0;
         ptr++;
-        
-        if (*ptr != ' ') return 0;
-        ptr++;
-        
-        if (!isdigit(*ptr)) return 0;
-        while (isdigit(*ptr)) ptr++;
-        
-        if (*ptr && *ptr != ' ' && *ptr != '\n') return 0;
     }
     return 1;
 }
@@ -39,7 +27,7 @@ int compress_file(const char *input_filename, const char *output_filename) {
 
     char current_char, prev_char;
     int count = 1;
-    int first_in_line = 1;
+    int first_char = 1;
     int compressed_length = 0;
 
     prev_char = fgetc(input_file);
@@ -50,28 +38,27 @@ int compress_file(const char *input_filename, const char *output_filename) {
     }
 
     while ((current_char = fgetc(input_file)) != EOF) {
-        if (current_char == prev_char && current_char != '\n') {
+        if (current_char == prev_char) {
             count++;
         } else {
             if (prev_char != '\n') {
-                if (!first_in_line) fprintf(output_file, " ");
+                if (!first_char) fprintf(output_file, " ");
                 fprintf(output_file, "%c %d", prev_char, count);
-                compressed_length += 2;
-                first_in_line = 0;
-            }
-            if (current_char == '\n') {
+                compressed_length += count;
+                first_char = 0;
+            } else {
                 fprintf(output_file, "\n");
-                first_in_line = 1;
+                first_char = 1;
             }
             count = 1;
             prev_char = current_char;
         }
     }
 
-    if (prev_char != EOF && prev_char != '\n') {
-        if (!first_in_line) fprintf(output_file, " ");
+    if (prev_char != '\n' && prev_char != EOF) {
+        if (!first_char) fprintf(output_file, " ");
         fprintf(output_file, "%c %d", prev_char, count);
-        compressed_length += 2;
+        compressed_length += count;
     }
 
     fclose(input_file);
@@ -102,10 +89,7 @@ int decompress_file(const char *input_filename, const char *output_filename) {
         }
 
         char *ptr = line;
-        int is_empty_line = 1;
-
         while (*ptr && sscanf(ptr, " %c %d", &current_char, &count) == 2) {
-            is_empty_line = 0;
             for (int i = 0; i < count; i++) {
                 fputc(current_char, output_file);
                 decompressed_length++;
@@ -116,7 +100,7 @@ int decompress_file(const char *input_filename, const char *output_filename) {
             while (*ptr && isdigit(*ptr)) ptr++;
         }
         
-        if (!is_empty_line) fputc('\n', output_file);
+        if (*ptr != '\n') fputc('\n', output_file);
     }
 
     fclose(input_file);
@@ -141,25 +125,26 @@ int run_tests(const char *test_file, int is_compression) {
             
             FILE *temp_in = fopen(temp_input, "w");
             FILE *temp_exp = fopen(temp_expected, "w");
-            int input_phase = 1;
+            int line_count = 0;
+            int total_lines = 0;
             
-            while (fgets(line, sizeof(line), fp)) {
-                if (line[0] == '=') break;
-                if (strncmp(line, "# Test Case", 10) == 0 || strlen(line) <= 1) continue;
+            // Count total lines in test case
+            long pos = ftell(fp);
+            while (fgets(line, sizeof(line), fp) && line[0] != '=') {
+                if (strlen(line) > 1) total_lines++;
+            }
+            fseek(fp, pos, SEEK_SET);
+            
+            // Process test case
+            while (fgets(line, sizeof(line), fp) && line[0] != '=') {
+                if (strlen(line) <= 1) continue;
                 
-                if (input_phase) {
+                if (line_count < total_lines/2) {
                     fputs(line, temp_in);
                 } else {
                     fputs(line, temp_exp);
                 }
-                
-                char next_line[MAX_LINE_LENGTH];
-                long pos = ftell(fp);
-                if (fgets(next_line, sizeof(next_line), fp)) {
-                    fseek(fp, pos, SEEK_SET);
-                    if (next_line[0] != '=' && strncmp(next_line, "# Test Case", 10) != 0) continue;
-                }
-                input_phase = 0;
+                line_count++;
             }
             
             fclose(temp_in);
@@ -176,11 +161,15 @@ int run_tests(const char *test_file, int is_compression) {
 
                 while (fgets(line, sizeof(line), out)) {
                     char expected[MAX_LINE_LENGTH];
-                    if (!fgets(expected, sizeof(expected), exp) || strcmp(line, expected) != 0) {
+                    if (!fgets(expected, sizeof(expected), exp) || 
+                        strcmp(line, expected) != 0) {
                         match = 0;
                         break;
                     }
                 }
+
+                // Check if expected file has more lines
+                if (fgets(line, sizeof(line), exp)) match = 0;
 
                 fclose(out);
                 fclose(exp);
