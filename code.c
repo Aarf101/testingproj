@@ -80,36 +80,36 @@ int decompress_file(const char *input_filename, const char *output_filename) {
     }
 
     char line[MAX_LINE_LENGTH];
-    char current_char;
-    int count;
     int decompressed_length = 0;
 
     while (fgets(line, sizeof(line), input_file)) {
-        if (!validate_line(line)) {
-            fclose(input_file);
-            fclose(output_file);
-            return 0;
-        }
-
         char *ptr = line;
-        while (*ptr && sscanf(ptr, " %c %d", &current_char, &count) == 2) {
+        char current_char;
+        int count;
+
+        while (*ptr && sscanf(ptr, "%c %d", &current_char, &count) == 2) {
             for (int i = 0; i < count; i++) {
                 fputc(current_char, output_file);
                 decompressed_length++;
             }
             
+            // Move pointer past current character and count
             while (*ptr && *ptr != ' ') ptr++;
-            while (*ptr && *ptr == ' ') ptr++;
+            if (*ptr) ptr++;
             while (*ptr && isdigit(*ptr)) ptr++;
+            if (*ptr) ptr++;
         }
         
-        if (*ptr != '\n') fputc('\n', output_file);
+        if (*(ptr-1) != '\n') {
+            fputc('\n', output_file);
+        }
     }
 
     fclose(input_file);
     fclose(output_file);
     return decompressed_length;
 }
+
 
 int run_tests(const char *test_file, int is_compression) {
     FILE *fp = fopen(test_file, "r");
