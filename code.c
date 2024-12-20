@@ -124,30 +124,32 @@ int run_tests(const char *test_file, int is_compression) {
     
     while (fgets(line, sizeof(line), fp) && test_count < MAX_TEST_CASES) {
         if (strncmp(line, "# Test Case", 10) == 0) {
-            printf("\nRunning Test Case %d:\n", test_count + 1);
-            
             FILE *temp_in = fopen(temp_input, "w");
             FILE *temp_exp = fopen(temp_expected, "w");
-            int line_count = 0;
-            int total_lines = 0;
+            int input_section = 1;
             
-            // Count total lines in test case
-            long pos = ftell(fp);
-            while (fgets(line, sizeof(line), fp) && line[0] != '=') {
-                if (strlen(line) > 1) total_lines++;
-            }
-            fseek(fp, pos, SEEK_SET);
-            
-            // Process test case
-            while (fgets(line, sizeof(line), fp) && line[0] != '=') {
-                if (strlen(line) <= 1) continue;
+            while (fgets(line, sizeof(line), fp)) {
+                // Skip comments and empty lines
+                if (line[0] == '#' || line[0] == '\n') continue;
                 
-                if (line_count < total_lines/2) {
+                // Check for end of test case
+                if (line[0] == '=') break;
+                
+                // Write to appropriate file
+                if (input_section) {
                     fputs(line, temp_in);
                 } else {
                     fputs(line, temp_exp);
                 }
-                line_count++;
+                
+                // Check next line to determine section
+                char peek[MAX_LINE_LENGTH];
+                long pos = ftell(fp);
+                if (fgets(peek, sizeof(peek), fp)) {
+                    fseek(fp, pos, SEEK_SET);
+                    if (peek[0] != '=' && !isspace(peek[0])) continue;
+                }
+                input_section = 0;
             }
             
             fclose(temp_in);
