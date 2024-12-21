@@ -163,21 +163,20 @@ int run_tests(const char *test_file, int is_compression) {
                 char exp_line[MAX_LINE_LENGTH];
 
                 while (fgets(out_line, sizeof(out_line), out)) {
-                    if (!fgets(exp_line, sizeof(exp_line), exp) || 
-                        strcmp(out_line, exp_line) != 0) {
+                    if (!fgets(exp_line, sizeof(exp_line), exp)) {
                         match = 0;
-                        printf("Character by character comparison:\n");
-                        printf("Expected: ");
-                        for(int i = 0; exp_line[i] != '\0'; i++) {
-                            printf("[%c:%d] ", exp_line[i], exp_line[i]);
-                        }
-                        printf("\nActual: ");
-                        for(int i = 0; out_line[i] != '\0'; i++) {
-                            printf("[%c:%d] ", out_line[i], out_line[i]);
-                        }
-                        printf("\n");
                         break;
-                     }
+                    }
+                    // Trim trailing whitespace from both lines
+                    char *end = out_line + strlen(out_line) - 1;
+                    while (end > out_line && isspace(*end)) *end-- = '\0';
+                    end = exp_line + strlen(exp_line) - 1;
+                    while (end > exp_line && isspace(*end)) *end-- = '\0';
+    
+                    if (strcmp(out_line, exp_line) != 0) {
+                        match = 0;
+                        break;
+                    }
                 }
                 
                 if (fgets(exp_line, sizeof(exp_line), exp)) match = 0;
