@@ -132,7 +132,7 @@ int run_tests(const char *test_file, int is_compression) {
 
             while (fgets(line, sizeof(line), fp)) {
                 if (line[0] == '=') break;
-                if (line[0] == '#' || line[0] == '\n') continue;
+                if (line[0] == '\n') continue;
 
                 if (!found_format) {
                     is_input_compressed = is_compressed_format(line);
