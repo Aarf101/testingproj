@@ -214,6 +214,7 @@ int run_tests(const char *test_file, int is_compression) {
 
 
 
+
 int main(int argc, char *argv[]) {
     if (argc == 3) {
         if (strcmp(argv[1], "-test-compress") == 0) return run_tests(argv[2], 1) ? 0 : 1;
