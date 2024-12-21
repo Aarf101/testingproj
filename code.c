@@ -106,25 +106,12 @@ int decompress_file(const char *input_filename, const char *output_filename) {
 
 
 int is_compressed_format(const char *line) {
-    int i = 0;
-    while (line[i] && line[i] != '\n') {
-        // Skip the character
-        if (!line[i]) return 0;
-        i++;
-        
-        // Must have a space after character
-        if (line[i] != ' ') return 0;
-        i++;
-        
-        // Must have a number after space
-        if (!isdigit(line[i])) return 0;
-        while (isdigit(line[i])) i++;
-        
-        // Must have a space or newline after number
-        if (line[i] && line[i] != ' ' && line[i] != '\n') return 0;
-        if (line[i] == ' ') i++;
-    }
-    return 1;
+    if (strlen(line) < 3) return 0;  // Minimum length for "c n"
+    char *space = strchr(line, ' ');
+    if (!space) return 0;
+    
+    // Check if there's a number after the space
+    return isdigit(*(space + 1));
 }
 
 int run_tests(const char *test_file, int is_compression) {
@@ -144,13 +131,23 @@ int run_tests(const char *test_file, int is_compression) {
             
             FILE *temp_in = fopen(temp_input, "w");
             FILE *temp_exp = fopen(temp_expected, "w");
+            int found_format = 0;
+            int is_input_compressed = 0;
             
             while (fgets(line, sizeof(line), fp)) {
                 if (line[0] == '=') break;
                 if (line[0] == '#' || line[0] == '\n') continue;
                 
+                // Determine format on first content line
+                if (!found_format) {
+                    is_input_compressed = is_compressed_format(line);
+                    found_format = 1;
+                }
+                
+                // For compression: input is uncompressed, expected is compressed
+                // For decompression: input is compressed, expected is uncompressed
                 if ((is_compression && !is_compressed_format(line)) || 
-                    (!is_compression && is_compressed_format(line))) {
+                    (!is_compression && is_compressed_format(line) == is_input_compressed)) {
                     fputs(line, temp_in);
                 } else {
                     fputs(line, temp_exp);
@@ -213,6 +210,7 @@ int run_tests(const char *test_file, int is_compression) {
     printf("\nTest Results: %d/%d passed\n", passed, test_count);
     return passed == test_count;
 }
+
 
 
 
