@@ -18,7 +18,6 @@ int validate_line(const char *line) {
 int compress_file(const char *input_filename, const char *output_filename) {
     FILE *input_file = fopen(input_filename, "r");
     if (!input_file) return 0;
-
     FILE *output_file = fopen(output_filename, "w");
     if (!output_file) {
         fclose(input_file);
@@ -71,7 +70,6 @@ int compress_file(const char *input_filename, const char *output_filename) {
 int decompress_file(const char *input_filename, const char *output_filename) {
     FILE *input_file = fopen(input_filename, "r");
     if (!input_file) return 0;
-
     FILE *output_file = fopen(output_filename, "w");
     if (!output_file) {
         fclose(input_file);
@@ -126,7 +124,7 @@ int run_tests(const char *test_file, int is_compression) {
     int passed = 0;
 
     while (fgets(line, sizeof(line), fp) && test_count < MAX_TEST_CASES) {
-        if (strncmp(line, "# Test Case", 10) == 0) {
+        if (strncmp(line, "Test Case", 9) == 0) {
             FILE *temp_in = fopen(temp_input, "w");
             FILE *temp_exp = fopen(temp_expected, "w");
             int found_format = 0;
@@ -167,7 +165,6 @@ int run_tests(const char *test_file, int is_compression) {
                         match = 0;
                         break;
                     }
-                    // Trim trailing whitespace from both lines
                     char *end = out_line + strlen(out_line) - 1;
                     while (end > out_line && isspace(*end)) *end-- = '\0';
                     end = exp_line + strlen(exp_line) - 1;
@@ -180,7 +177,6 @@ int run_tests(const char *test_file, int is_compression) {
                 }
                 
                 if (fgets(exp_line, sizeof(exp_line), exp)) match = 0;
-
                 fclose(out);
                 fclose(exp);
 
@@ -209,7 +205,6 @@ int run_tests(const char *test_file, int is_compression) {
     remove(temp_input);
     remove(temp_output);
     remove(temp_expected);
-
     printf("\nTest Results: %d/%d passed\n", passed, test_count);
     return passed == test_count;
 }
@@ -242,6 +237,5 @@ int main(int argc, char *argv[]) {
         printf("Invalid mode. Use -compress, -decompress, -test-compress, or -test-decompress\n");
         return 1;
     }
-
     return 0;
 }
