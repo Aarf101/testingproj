@@ -166,8 +166,18 @@ int run_tests(const char *test_file, int is_compression) {
                     if (!fgets(exp_line, sizeof(exp_line), exp) || 
                         strcmp(out_line, exp_line) != 0) {
                         match = 0;
+                        printf("Character by character comparison:\n");
+                        printf("Expected: ");
+                        for(int i = 0; exp_line[i] != '\0'; i++) {
+                            printf("[%c:%d] ", exp_line[i], exp_line[i]);
+                        }
+                        printf("\nActual: ");
+                        for(int i = 0; out_line[i] != '\0'; i++) {
+                            printf("[%c:%d] ", out_line[i], out_line[i]);
+                        }
+                        printf("\n");
                         break;
-                    }
+                     }
                 }
                 
                 if (fgets(exp_line, sizeof(exp_line), exp)) match = 0;
