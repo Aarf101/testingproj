@@ -1,8 +1,8 @@
 Test Case 1 - Mathematical sequence
-x 5 y 3 z 2 
-x 5 y 3 z 2
-xxxxxyyyzz
-xxxxxyyyzz
+x 4 y 3 z 2 
+x 4 y 3 z 2
+xxxxyyyzz
+xxxxyyyzz
 =
 
 Test Case 2 - Network addresses
